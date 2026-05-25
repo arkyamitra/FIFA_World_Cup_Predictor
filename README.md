@@ -85,6 +85,8 @@ The model currently uses engineered football features such as:
 | Draw       | 35.85%      |
 | Brazil Win | 33.31%      |
 
+![Prediction Output](images/prediction_output.png)
+
 The model identifies this matchup as highly balanced with significant draw probability due to structural similarity between elite teams.
 
 ---
