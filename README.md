@@ -1,148 +1,171 @@
-# FIFA World Cup Prediction Engine
+# FIFA World Cup 2026 Predictor
 
-A machine learning-based football match prediction engine built using Python and Logistic Regression.
-
-This project predicts football match outcomes using:
-
-* team form
-* defensive strength
-* dominance metrics
-* rolling performance indicators
-* probabilistic multiclass forecasting
-
-The model predicts:
-
-* Away Win
-* Draw
-* Home Win
-
-along with outcome probabilities for each match.
+A machine learning and Monte Carlo simulation project that forecasts the 2026 FIFA World Cup using historical international football results, Elo ratings, engineered team performance metrics, and tournament simulation.
 
 ---
 
-# Project Motivation
+# 2026 FIFA World Cup Forecast
 
-As a football fan and aspiring sports analyst, I wanted to combine:
+Based on 10,000 tournament simulations.
 
-* football intuition
-* data analysis
-* machine learning
+![World Cup Forecast](images/world_cup_winner_forecast.png)
 
-to build a realistic football forecasting system from scratch while learning Python, GitHub, and sports analytics.
+Forecast generated from 10,000 Monte Carlo simulations using machine-learning-based match probabilities and Elo ratings.
 
-This project represents my first end-to-end machine learning project.
+**Simulation Settings**
 
----
+- 10,000 Monte Carlo simulations
+- Logistic Regression match prediction model
+- Elo ratings included
+- Historical international match data used for training
 
-# Features Used
+## Top Title Probabilities
 
-The model currently uses engineered football features such as:
-
-* Recent Team Form
-* Rolling Goal Difference
-* Defensive Strength
-* Dominance Difference
-* Matchup Closeness Indicators
-* Rolling Goals Scored
-* Rolling Goals Conceded
-
----
-
-# Machine Learning Approach
-
-### Model
-
-* Logistic Regression (Multiclass Classification)
-
-### Prediction Classes
-
-| Class | Meaning  |
-| ----- | -------- |
-| 0     | Away Win |
-| 1     | Draw     |
-| 2     | Home Win |
-
-### Key ML Concepts Used
-
-* Feature Engineering
-* Rolling Statistics
-* Multiclass Classification
-* Probability Forecasting
-* Correlation Analysis
-* Multicollinearity Detection
-* Class Balancing
-* Confusion Matrix Evaluation
+| Team | Probability |
+|--------|------------|
+| France | 21.2% |
+| Spain | 18.7% |
+| Argentina | 13.6% |
+| Germany | 6.0% |
+| Japan | 4.0% |
+| Croatia | 4.0% |
+| England | 3.9% |
+| Portugal | 3.5% |
+| Ecuador | 3.4% |
+| Netherlands | 3.3% |
 
 ---
 
-# Sample Match Prediction
+# Project Overview
 
-### Brazil vs France
+The project combines:
 
-| Outcome    | Probability |
-| ---------- | ----------- |
-| France Win | 30.83%      |
-| Draw       | 35.85%      |
-| Brazil Win | 33.31%      |
+- Machine Learning
+- Elo Ratings
+- Feature Engineering
+- Probabilistic Forecasting
+- Monte Carlo Simulation
 
-![Prediction Output](images/prediction_output.png)
-
-The model identifies this matchup as highly balanced with significant draw probability due to structural similarity between elite teams.
+to estimate the probability of every team winning the 2026 FIFA World Cup.
 
 ---
 
-# Key Insights From The Model
+# Methodology
 
-* Defensive structure strongly impacts match outcomes.
-* Balanced elite teams tend to increase draw probability.
-* Home advantage remains statistically important.
-* Dominance metrics are more predictive than raw attacking output.
+## Match Prediction Model
+
+A multiclass Logistic Regression model predicts:
+
+- Away Win
+- Draw
+- Home Win
+
+for every match.
+
+The model outputs probabilities rather than deterministic predictions.
+
+Example:
+
+| Outcome | Probability |
+|----------|-------------|
+| Away Win | 30% |
+| Draw | 35% |
+| Home Win | 35% |
+
+
+### Model Evaluation
+
+![Confusion Matrix](images/Confusion_matrix.png)
 
 ---
 
-# 🛠️ Tech Stack
+## Features Used
 
-* Python
-* pandas
-* scikit-learn
-* seaborn
-* matplotlib
-* Git
-* GitHub
+### Team Form
+
+Measures recent performance over previous matches.
+
+### Attack Difference
+
+Difference in attacking strength between teams.
+
+### Defence Difference
+
+Difference in defensive performance.
+
+### Dominance Difference
+
+Captures overall control and effectiveness.
+
+### Closeness Metrics
+
+Measures how evenly matched two teams are.
+
+### Elo Ratings
+
+International football Elo ratings are incorporated to capture long-term team strength.
+
+---
+
+# World Cup Simulation Engine
+
+The simulator:
+
+1. Simulates all group-stage matches.
+2. Calculates standings.
+3. Identifies group winners and runners-up.
+4. Selects the best third-place teams.
+5. Advances teams through:
+   - Round of 32
+   - Round of 16
+   - Quarterfinals
+   - Semifinals
+   - Final
+6. Repeats the tournament thousands of times.
+
+---
+
+# Machine Learning Concepts Used
+
+- Feature Engineering
+- Logistic Regression
+- Multiclass Classification
+- Probability Forecasting
+- Class Balancing
+- Correlation Analysis
+- Model Evaluation
+- Monte Carlo Simulation
 
 ---
 
 # Project Structure
 
-```bash
+```text
 FIFA_World_Cup_Predictor/
-│
+
 ├── data/
+│   ├── world_cup_groups.csv
+│   ├── world_cup_fixtures.csv
+│
+├── images/
+│   ├── Confusion_matrix.png
+│   ├── world_cup_winner_forecast.png
+│
+├── output/
+│   ├── world_cup_predictions.csv
+│   ├── world_cup_predictions.xlsx
+│
 ├── src/
 │   ├── train_model.py
-│   ├── predict_match.py
+│   ├── prediction_engine.py
+│   ├── simulate_match.py
+│   ├── elo_ratings.py
+│   ├── extract_groups.py
+│   ├── world_cup_simulator.py
 │
-├── requirements.txt
 ├── README.md
+├── requirements.txt
 ```
-
----
-
-# Future Improvements
-
-Planned Version 2 upgrades include:
-
-* ELO Ratings Integration
-* Expected Goals (xG)
-* Tournament Importance Weighting
-* Neutral Venue Adjustments
-* World Cup Simulation Engine
-* Streamlit Web App
-* Interactive Dashboard
-* Player-Level Features
-* Lineup Strength Modeling
-
----
 
 # Installation
 
@@ -158,36 +181,49 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run prediction script:
+Run the simulator:
 
 ```bash
-python src/predict_match.py
+python src/world_cup_simulator.py
 ```
 
----
+# Results
 
-# Current Status
+The simulation identifies:
 
-✅ Version 1 Complete
-
-The current version successfully performs:
-
-* multiclass football prediction
-* probability forecasting
-* draw-aware modeling
-* reusable match predictions
+- France as the tournament favourite.
+- Spain as the strongest challenger.
+- Argentina as a clear third contender.
+- Ecuador as a potential dark horse due to strong defensive metrics.
+- Traditional powers such as Brazil and England remained competitive but were not among the strongest title favourites in the simulation.
 
 ---
 
-# Acknowledgements
+# Project Status
 
-Built while learning:
+✅ Completed
 
-* machine learning
-* Python
-* GitHub
-* sports analytics
+This project successfully combines machine learning, Elo ratings, feature engineering, and Monte Carlo simulation to forecast the 2026 FIFA World Cup.
 
-through hands-on experimentation and iterative improvement.
+The current version includes:
 
-Football data sourced from publicly available international football match datasets.
+- Match outcome prediction using Logistic Regression
+- Elo rating integration
+- Feature-engineered team strength metrics
+- Group stage simulation
+- Knockout stage simulation
+- 10,000 tournament Monte Carlo simulations
+- Championship probability forecasting
+
+The repository is maintained as a completed sports analytics portfolio project.
+
+---
+
+
+# Author
+
+Arkya Mitra
+
+Sports Analytics • Machine Learning • Marketing Analytics
+
+GitHub: github.com/arkyamitra
