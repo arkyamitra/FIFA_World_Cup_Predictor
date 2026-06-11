@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+data/worldcup-soccer-2026.xlsx
+data/worldcup-soccer-2026.pdf
+images/github_homepage.png

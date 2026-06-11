@@ -1,11 +1,9 @@
 import pandas as pd
+import random
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import StandardScaler
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 df = pd.read_csv("C:/Users/arkya.mitra/OneDrive - OneWorkplace/Projects/FIFA_World_Cup_Predictor/data/results.csv")
 
@@ -242,73 +240,89 @@ model = LogisticRegression(
 
 model.fit(x_train,y_train)
 
-predictions = model.predict(x_test)
 
-probabilities = model.predict_proba(x_test)
+def get_match_probabilities(
+    home_team,
+    away_team):
 
-accuracy = accuracy_score(y_test,predictions)
-print("Model Accucary:")
-print(accuracy)
+    home_data = df[
+        df["home_team"] == home_team
+    ].tail(1)
 
-probability_df = pd.DataFrame(
-    probabilities,
-    columns=[
-        "Away Win Probability",
-        "Draw Probability",
-        "Home Win Probability"
-    ]
-)
+    away_data = df[
+        df["away_team"] == away_team
+    ].tail(1)
 
-print(probability_df.head())
+    input_data = pd.DataFrame({
+        "defence_difference": [
+            home_data["defence_difference"].values[0]
+        ],
+        "dominance_difference": [
+            home_data["dominance_difference"].values[0]
+        ],
+        "dominance_closeness": [
+            home_data["dominance_closeness"].values[0]
+        ],
+        "defence_closeness": [
+            home_data["defence_closeness"].values[0]
+        ],
+        "home_elo": [
+            get_elo(home_team)
+        ],
+        "away_elo": [
+            get_elo(away_team)
+        ],
+        "elo_difference": [
+            get_elo(home_team)
+            -
+            get_elo(away_team)
+        ]
+    })
 
-results_df = x_test.copy()
-results_df["Actual Result"] = y_test.values
-results_df["Predicted Result"] = predictions
-results_df["Away Win Probability"] = probabilities[:,0]
-results_df["Draw Probability"] = probabilities[:,1]
-results_df["Home Win Probability"] = probabilities[:,2]
+    input_scaled = pd.DataFrame(
+        scaler.transform(input_data),
+        columns = input_data.columns
+    )
 
-print(results_df.head())
+    probabilities = model.predict_proba(
+        input_scaled
+    )[0]
 
+    return probabilities
 
-cm = confusion_matrix(y_test,predictions)
-print(cm)
+def simulate_match(
+    home_team,
+    away_team):
 
-coefficients = pd.DataFrame(
-    model.coef_,
-    columns=  features
-)
+    probabilities = get_match_probabilities(
+        home_team,
+        away_team
+    )
 
-coefficients.index = [
-    "Away Win",
-    "Draw",
-    "Home Win"
-]
+    away_win_probability = probabilities[0]
+    draw_probability = probabilities[1]
+    home_win_probability = probabilities[2]
 
-print(coefficients)
+    random_number = random.random()
 
-correlation_matrix = x.corr()
-print(correlation_matrix)
+    if random_number < away_win_probability:
 
+        return "Away Win"
 
-plt.figure(figsize=(8,6))
-sns.heatmap(
-    correlation_matrix,
-    annot=True,
-    cmap="coolwarm"
-)
+    elif random_number < (
+        away_win_probability + draw_probability
+    ):
 
-plt.title("Feature Correlation Matrix")
-plt.show()
+        return "Draw"
 
-plt.figure(figsize=(6,5))
-sns.heatmap(
-    cm,
-    annot= True,
-    cmap="Blues"
-)
+    else:
 
-plt.title("Confusion Matrix")
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
-plt.show()
+        return "Home Win"
+
+for i in range(10):
+    result = simulate_match(
+        "Brazil",
+        "France"
+    )
+print(result)
+

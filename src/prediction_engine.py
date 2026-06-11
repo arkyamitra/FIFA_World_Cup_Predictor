@@ -1,11 +1,9 @@
 import pandas as pd
+import random
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import StandardScaler
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 df = pd.read_csv("C:/Users/arkya.mitra/OneDrive - OneWorkplace/Projects/FIFA_World_Cup_Predictor/data/results.csv")
 
@@ -210,10 +208,12 @@ df.loc[
 
 print(df["target"].value_counts())
 
-features = ["defence_difference",
+features = ["attack_difference",
+            "defence_difference",
             "dominance_difference",
             "dominance_closeness",
             "defence_closeness",
+            "form_difference",
             "home_elo",
             "away_elo",
             "elo_difference"]
@@ -242,73 +242,150 @@ model = LogisticRegression(
 
 model.fit(x_train,y_train)
 
-predictions = model.predict(x_test)
+def get_latest_team_data(team):
 
-probabilities = model.predict_proba(x_test)
+    team_matches = df[
 
-accuracy = accuracy_score(y_test,predictions)
-print("Model Accucary:")
-print(accuracy)
+        (df["home_team"] == team)
 
-probability_df = pd.DataFrame(
-    probabilities,
-    columns=[
-        "Away Win Probability",
-        "Draw Probability",
-        "Home Win Probability"
-    ]
-)
+        |
 
-print(probability_df.head())
+        (df["away_team"] == team)
 
-results_df = x_test.copy()
-results_df["Actual Result"] = y_test.values
-results_df["Predicted Result"] = predictions
-results_df["Away Win Probability"] = probabilities[:,0]
-results_df["Draw Probability"] = probabilities[:,1]
-results_df["Home Win Probability"] = probabilities[:,2]
+    ].tail(1)
 
-print(results_df.head())
+    return team_matches
 
+def get_match_probabilities(
+    home_team,
+    away_team):
+    
+    team_mapping = {
+        "Czechia": "Czech Republic",
+        "Türkiye": "Turkey",
+        "IR Iran": "Iran",
+        "Côte d'Ivoire": "Ivory Coast",
+        "Congo DR": "DR Congo",
+        "Curacao": "Curaçao",
+        "Bosnia-Herzegovina": "Bosnia and Herzegovina",
+        "USA": "United States",
+        "Cabo Verde": "Cape Verde"
+        }
 
-cm = confusion_matrix(y_test,predictions)
-print(cm)
+    home_team = team_mapping.get(
+        home_team,
+        home_team
+    )
 
-coefficients = pd.DataFrame(
-    model.coef_,
-    columns=  features
-)
+    away_team = team_mapping.get(
+        away_team,
+        away_team
+    )
 
-coefficients.index = [
-    "Away Win",
-    "Draw",
-    "Home Win"
-]
+    home_data = get_latest_team_data(
+        home_team
+    )
 
-print(coefficients)
+    away_data = get_latest_team_data(
+        away_team
+    )
 
-correlation_matrix = x.corr()
-print(correlation_matrix)
+    if home_data.empty:
+        print(
+            "Missing Home Team:",
+            home_team
+        )
+    
+    if away_data.empty:
+        print(
+            "Missing Away Team:",
+            away_team
+        )
 
+    if home_data.empty or away_data.empty:
+               print(
+                   "Missing team data:",
+                   home_team,
+                   away_team
+               )
+               return[0.33,0.34,0.33]
 
-plt.figure(figsize=(8,6))
-sns.heatmap(
-    correlation_matrix,
-    annot=True,
-    cmap="coolwarm"
-)
+    input_data = pd.DataFrame({
+        "attack_difference": [
+            home_data["attack_difference"].values[0]
+            -
+            away_data["attack_difference"].values[0]
+        ],
+        "defence_difference": [
+            home_data["defence_difference"].values[0]
+            -
+            away_data["defence_difference"].values[0]
+        ],
+        "dominance_difference": [
+            home_data["dominance_difference"].values[0]
+            -
+            away_data["dominance_difference"].values[0]
+        ],
+        "dominance_closeness": [
+            home_data["dominance_closeness"].values[0]
+        ],
+        "defence_closeness": [
+            home_data["defence_closeness"].values[0]
+        ],
+        "form_difference": [
+            home_data["form_difference"].values[0]
+            -
+            away_data["form_difference"].values[0]
+        ],
+        "home_elo": [
+            get_elo(home_team)
+        ],
+        "away_elo": [
+            get_elo(away_team)
+        ],
+        "elo_difference": [
+            get_elo(home_team)
+            -
+            get_elo(away_team)
+        ]
+    })
 
-plt.title("Feature Correlation Matrix")
-plt.show()
+    input_scaled = pd.DataFrame(
+        scaler.transform(input_data),
+        columns = input_data.columns
+    )
 
-plt.figure(figsize=(6,5))
-sns.heatmap(
-    cm,
-    annot= True,
-    cmap="Blues"
-)
+    probabilities = model.predict_proba(
+        input_scaled
+    )[0]
 
-plt.title("Confusion Matrix")
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
-plt.show()
+    return probabilities
+
+def simulate_match(
+    home_team,
+    away_team):
+
+    probabilities = get_match_probabilities(
+        home_team,
+        away_team
+    )
+
+    away_win_probability = probabilities[0]
+    draw_probability = probabilities[1]
+    home_win_probability = probabilities[2]
+
+    random_number = random.random()
+
+    if random_number < away_win_probability:
+
+        return "Away Win"
+
+    elif random_number < (
+        away_win_probability + draw_probability
+    ):
+
+        return "Draw"
+
+    else:
+
+        return "Home Win"
